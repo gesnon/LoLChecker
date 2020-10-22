@@ -1,10 +1,12 @@
-﻿using RiotSharp;
+﻿using LoLChecker.Logic.Models;
+using RiotSharp;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
 using RiotSharp.Endpoints.SummonerEndpoint;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Text;
 
 namespace LoLChecker.Logic
@@ -14,7 +16,7 @@ namespace LoLChecker.Logic
         private RiotApi _api;
         public RiotAPI ()
         {
-           _api = RiotApi.GetDevelopmentInstance("RGAPI-1257aac3-ee80-48cf-8d4b-76b4e99e9f94");
+           _api = RiotApi.GetDevelopmentInstance("RGAPI-84171906-8f89-41ab-9b06-5c2911300015");
         }
          
         public Summoner GetSummoner(String name)
@@ -47,17 +49,15 @@ namespace LoLChecker.Logic
         }
 
         
-        public async System.Threading.Tasks.Task<List<Match>> GetMatchHistoryForChampionAsync(string id, string name)
+        public async System.Threading.Tasks.Task<List<Match>> GetMatchHistoryForSummonerAsync(string id)
         {
-            List<int> ChampionId = new List<int> { 51 };
-
-            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id, ChampionId);
+            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id);
 
             List<Match> matchesList = new List<Match>();
 
             foreach (var matchReference in matchList.Matches)
             {
-                if (matchesList.Count > 10)
+                if (matchesList.Count > 80)
                 {
                     return matchesList;
                 }
@@ -72,14 +72,38 @@ namespace LoLChecker.Logic
 
         }
 
-        public async System.Threading.Tasks.Task<float> GetWinratioAgainstChampionAsync(string id, string name)
+        public async System.Threading.Tasks.Task<WinRatioAgainstChampion> GetWinratioAgainstChampionAsync(string id, string name)
         {
-            var matches = await GetMatchHistoryForChampionAsync(id, name);
-
-            foreach (var game in matches)
+            int championID = GetChampion(name).Id;
+            WinRatioAgainstChampion statictic = new WinRatioAgainstChampion();     
+            
+            List<Match> matchesList = await GetMatchHistoryForSummonerAsync(id);                    
+           
+            foreach (var game in matchesList)
             {
+                var player = game.Participants.FirstOrDefault(q => q.ChampionId == championID);
 
+                if (player == null) { continue; }
+
+                int myParticipantID = game.ParticipantIdentities.FirstOrDefault(q => q.Player.AccountId == id).ParticipantId;
+                
+                int myTeamID = game.Participants.FirstOrDefault(q => q.ParticipantId == myParticipantID).TeamId;
+                
+                if (player.TeamId != myTeamID)
+                {
+                    statictic.AmountGames++;
+
+                    if (!player.Stats.Winner)
+                    {
+                        statictic.AmountWins++;
+                    }
+
+                }
             }
+
+            statictic.Winratio = statictic.AmountWins / (float)statictic.AmountGames;            
+
+            return statictic;
         }
 
     }

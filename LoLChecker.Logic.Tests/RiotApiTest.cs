@@ -29,14 +29,13 @@ namespace LoLChecker.Logic.Tests
 
             string name = "gesnons";
 
-            string championName = "lucian";
+            string championName = "Garen";
 
             var summoner = riotApiTest.GetSummoner(name);
 
-            var matchHistory = await riotApiTest.GetMatchHistoryForChampionAsync(summoner.AccountId,championName );
+            var matchHistory = await riotApiTest.GetWinratioAgainstChampionAsync(summoner.AccountId, championName);
 
-            Assert.AreEqual(5, matchHistory.Count);
-                      
+            Console.WriteLine(matchHistory.ToString());                      
         }
     }
 }
