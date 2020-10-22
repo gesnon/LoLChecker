@@ -19,7 +19,7 @@ namespace LoLChecker.Logic.Tests
 
             Assert.AreEqual(name, summoner.Name);
 
-            Assert.AreEqual(171, summoner.Level);
+            Assert.AreEqual(172, summoner.Level);
         }
 
         [TestMethod]
@@ -29,7 +29,7 @@ namespace LoLChecker.Logic.Tests
 
             string name = "gesnons";
 
-            string championName = "Garen";
+            string championName = "Nautilus";
 
             var summoner = riotApiTest.GetSummoner(name);
 

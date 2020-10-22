@@ -5,6 +5,7 @@ using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
 using RiotSharp.Endpoints.SummonerEndpoint;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,7 @@ namespace LoLChecker.Logic
 
         public async System.Threading.Tasks.Task<List<Match>> GetMatchHistoryAsync(string id)
         {
-            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id);
+            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id, queues: new List<int> { 420 });
 
             List<Match> matchesList = new List<Match>(); 
 
@@ -51,7 +52,7 @@ namespace LoLChecker.Logic
         
         public async System.Threading.Tasks.Task<List<Match>> GetMatchHistoryForSummonerAsync(string id)
         {
-            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id);
+            var matchList = await _api.Match.GetMatchListAsync(RiotSharp.Misc.Region.Euw, id, queues: new List<int> { 420 });
 
             List<Match> matchesList = new List<Match>();
 
@@ -92,6 +93,9 @@ namespace LoLChecker.Logic
                 if (player.TeamId != myTeamID)
                 {
                     statictic.AmountGames++;
+
+                    Debug.WriteLine(game.GameId);
+                    Debug.WriteLine(game.GameCreation);
 
                     if (!player.Stats.Winner)
                     {
